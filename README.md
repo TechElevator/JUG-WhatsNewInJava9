@@ -1,5 +1,5 @@
 # What's New in Java 9
-## Cleveland Java Meetup - August 19, 2017
+## Cleveland Java Meetup - July 19, 2017
 
 ## Slides and Notes
 
@@ -126,7 +126,7 @@ Translating to Java 9 modules.
 
 ![Moving to Modular](img/moving-to-modular.png)
 
-Notice the number of folders increased significantly, but only two `module-info.java` files were added to the total count of files. And outside of the moving around of files, and adjusting of packages, the code remains unchanged. The only important changes are in the two module definitions.  The building module `requires elevator`, and elevator `exports com.techelevator.elevator`.
+Notice the number of folders increased significantly, but only two `module-info.java` files were added to the total count of files. And outside of the moving around of files, and adjusting packages, the code remains unchanged. The only important changes are in the two module definitions.  The building module `requires elevator`, and elevator `exports com.techelevator.elevator`.
 
 It is no longer possible to use any of the public classes under elevator module other than the ones it exports.
 
