@@ -1,212 +1,138 @@
-***PENDING***
-
 # What's New in Java 9
 ## Cleveland Java Meetup - August 19, 2017
+
+## Slides and Notes
+
+### SLIDE: 1
+![Slide1](img/slide1.png)
+* It's more than just another version, it's a new JRE/JDK.
+
+### SLIDE: 2
+![Slide2](img/slide2.png)
+* In order to answer that question:
+* I'll go through a condensed version of the official features list
+* Drill-down on selected features from the condensed version
+* Demo a bit of code, and other things.
+
+### SLIDE: 3
+![Slide3](img/slide3.png)
+* Oracle identifies two key changes.
+* Version-String Schema seems an odd sort of choice for a key change. Perhaps because version stings can play a major role in build systems, and version specific code is scattered throughout the codebase.
+* $MAJOR Released every two to three years.
+* $MINOR Smaller releases for bug fixes and minor adjustments. Reset to zero when a new major version is released.
+* $SECURITY is really interesting. Incremented with every minor release that “contains critical fixes including those necessary to improve security” and is not reset when $MINOR increases.
+* There's lots more to say aboutJava Platform Module System, but let's continue down the list
+
+### SLIDE: 4
+![Slide4](img/slide4.png)
+* JShell - REPL stands for read-evaluate-print-loop.  A number of scripting languages like Python and Ruby have REPLs that allow for rapid learning and exploration.  Java now offers the same.
+* jlink - Creating custom runtime images is just so cool, it's impossible not to mention it.  
+* Think IoT.
+* Hopefully, we'll learn more at some future meetup.
+
+### SLIDE: 5
+![Slide5](img/slide5.png)
+* The way Oracle talks and acts, they must believe G1 is the ultimate garbage collector.
+* Improved user experience - G1 runs frequent collections that are limited to small time slices.  Garbage is collected in many small bites, rather than less frequent larger gulps.
+* Unified JVM logging sould be very helpful debugging and troubleshooting.
+
+### SLIDE: 6
+![Slide6](img/slide6.png)
+* If you shell out, and need better control of PIDs, Java 9 has you covered.
+* Who's against smaller strings?
+* The of() method is as cool as you need to create immutable lists, maps, and/or sets?
+* We'll see why Unsafe has gone away later.
+* Memory ordering fencing is necessary because most modern CPUs employ performance optimizations that can result in out-of-order execution.
+
+### SLIDE: 7
+![Slide7](img/slide7.png)
+* I know I'd like to hear more about private interface methods, especially why.
+* I would also like to know more about Nashorn. Don't think many of us use JavaScript inside our code.  Are we missing something?
+* Multi-resolution images have been available for iOS and Android for years, to name a few.
+* HiDPI on Windws and Linux eliminates scaling images small on those platforms because 300 pixels on a non-HiDPI display is about half the size when compared to a HiDPI display.
+* Don't do enough internationalization to know how important going from Unicode 6.2 to 8.0 is.
+
+### SLIDE: 8
+![Slide8](img/slide8.png)
+* Modules make sense at scale.
+* Modules are built using strong encapsulation, well-define interfaces, and explicit dependencies. We'll get to these shortly.
+* Before Java 9, modularity wasn't possible, basically because of the classpath.
+* The classpath destroys JAR groupings. All public classes become available once the JAR is loaded onto the classpath.
+
+### SLIDE: 9
+![Slide9](img/slide9.png)
+* Pressure was building over the years to address the problems with the runtime.
+* Java 8 compact profiles:
+* You have to move up to the next level, even if you only need one of its classes
+* compact1 - Smallest profile with Java core classes and logging and scripting APIs.
+* compact2 - Extends compact1 with XML, JDBC and RMI APIs.
+* compact3 - Extends compact2 with security and management APIs.
+* Project Jigsaw to the rescue.
+* Think about the amount of work involved with:
+* rearranging the codebase
+* deciding the public interface
+* defending choices on what is hidden.
+* Once again, custom runtime images:
+* How is it done? 
+* What are the limits?
+* I know I sure would like to know more.
+
+### SLIDE: 10
+![Slide10](img/slide10.png)
+* So, how is the wonderful trick performed?
+* Modules are made up of the module-folder and the module-info.java file.
+* All the classes and resources that make up the module are contained in the module-folder
+* The module-info.java file specifies the public interface with the `exports`, and dependencies with `requires`
+* Readability - In order to access exported packages from another module, you must require it. In other words, you must be able to "read" the other module.  
+* Transitive `requires` allows you to make something you require in your module, transitively available to another module. For instance, if you require java.logging in your module, and you want to make the instance of your logger available to another module, the second module must require java.logging in its own module-info.java. However, if you declare a `transitive requires` in your module descriptor, the other modules implicitly `requires` it.
+* Not sure I fully understand the usefullness of this, but "qualified exports" allow you to limit exporting to specific modules using the `to` clause.
+
+### SLIDE: 11
+![Slide11](img/slide11.png)
+* Hopelessly enamored with the phrase, "computing the transitive closure of the dependency graph"
+* Elaborate phrase, short explanation.
+* You don't need to migrate your old code in order to run on Java 9 thanks to the wonders of the unnamed module
+* We need to hear more about the actual migration process. Oracle has a document: [Migrating to Oracle JDK 9](https://docs.oracle.com/javase/9/migrate/toc.htm#JSMIG-GUID-7744EF96-5899-4FB2-B34E-86D49B2E89B6)
+
+### SLIDE: 12
+![Slide12](img/slide12.png)
+* See demo notes below
+
+### SLIDE: References
+![Slide13](img/slide13.png)
+* __Java 9 Modularity__ (Mak & Bakker) and __Java 9 for Programmers__ (Deitel and Deitel) are both excellent. __Java 9 for Programmers__ has an overstanding walkthrough of JShell.
+* __Modular Programming in Java 9__ (Kothagal) and __Java 9 with JShell__ (Hillar) are less thorough, but are nevertheless good introductions.
 
 ## Demo
 
 ### Code
 
+The code is intended for demo purposes only. ***It is not meant to be a persuasive arguement for modules.***
+
+The Java 8 Elevator code is shown and run from Eclipse.
+
+The code itself is very simple.  Basically the Building class is the application. It creates an instance of an Elevator in the `main` method, and is responsible for starting the elevator, picking up and delievering riders, and shutting the elevator down just before ending the application.
+
+The problem with the Java 8 version of the application is the building should be limited to using the Elevator class only, but since all the other classes are public, and have public methods, the application can create instances of any of these other classes, and access their public methods.
+
+For instance, adding `Car car = new Car(new Shaft(1, 20));` is perfectaly valid in the `main`method. It may not make sense, but the code will compile and run.
+
+The demo switches to the command line at this point, because I didn't have time to adequately acquaint myself with Eclipse's Java 9 support.
+
+Translating to Java 9 modules.
+* We want to prevent Building from accessing anything by elevator.
+* In for a penny, in for a pound. Once you enter the world of modules, everything becomes a module.
+* Each module needs its own module folder, so class files get moved around and re-packaged
+
+![Moving to Modular](img/moving-to-modular.png)
+
+Notice the number of folders increased significantly, but only two `module-info.java` files were added to the total count of files. And outside of the moving around of files, and adjusting of packages, the code remains unchanged. The only important changes are in the two module definitions.  The building module `requires elevator`, and elevator `exports com.techelevator.elevator`.
+
+It is no longer possible to use any of the public classes under elevator module other than the ones it exports.
+
+To compile: `javac -d bin --module-source-path  src  $(find . -name '*.java')`
+
+To run: `java --module-path bin --module building/com.techelevator.building.Building`
+
 ### JShell
-
-## Slides
-
-### SLIDE: What's New in Java 9
-It's more than just another version
-It is a significant change not only to the language, but to the JRE/JDK.
-
-### SLIDE: So, what is new?
-
-To answer that question, 
-* Go through a condensed version of the official features list
-* Drill-down on modules - ***THE Key feature***
-* Demo a bit of code.
-
-### SLIDE: Key Changes
-
-It's a rather longer list, so let's take in sections.
-
-Version-String Schema
-* $MAJOR marks the major version Oracle is planning to release every two to three years.
-* $MINOR marks the smaller releases for bug fixes and other details that follow regularly in between – it resets to zero when a new major version is released.
-* $SECURITY is really interesting – it gets bumped with every release that “contains critical fixes including those necessary to improve security” and is not reset when $MINOR increases.
-
-A key change becuase of build systems and version checks in code?
-
-There's lots more to say aboutJava Platform Module System, but let's continue down the list
-
-### SLIDE: New tools, improved tools
-JShell
-Java goes REPL
-Of course, there's a demo
-jlink
-Assemble module sets into custom runtime images
-jar
-Create multiple Java-version-specific class files in a single JAR 
-jcmd 
-New commands to print class and method info, and UTF8 strings
-java and javac
-Validation of numeric JVM command-line flags such as memory settings
---release to avoid accidental use of APIs (enhances -source and -target) 
-
-JVM performance
-Garbage First (G1) is default GC 
-Optimized for reduced latency over higher throughput
-Deprecated Concurrent Mark and Sweep GC 
-Replaced by G1
-Removes Java 8 garbage collection combinations
-DefNew + CMS, ParNew + SerialOld, and Incremental CMS
-Unified JVM logging for all components including GC
-
-
-Core libraries goodness
-Process API offers better control of Process IDs
-Compacted Strings now use byte arrays instead of char arrays
-Added XML Catelogs
-Convenience factories for collections: List.of(), Map.of(), Set.of()
-Variable Handles replace Unsafe memory ordering fencing
-Enhanced @Deprecation, now with forRemoval and since flags
-Spin-Wait hints
-Stack Walking API: easy filtering and lazy access of stack traces
-
-There's always a misc
-New security features
-Small language improvements, private interface methods
-JavaDocs module aware, simplified Doclet API
-Java 9 installer enhancements
-Nashorn supports EMCAScript 6 (selected features)
-Client-side: Multi-resolution images, HiDPI on Windows and Linux, GTK 3
-Supports Unicode 8.0, internationalization tweaks for XML and property files
-
-
-Modules
-What is modularity?
-Managing and reducing complexity, especially at scale
-Millions of lines of code
-Dependencies across several dozen shared libraries
-Strong encapsulation / Well-defined Interfaces / Explicit dependencies
-Pre-Java 9 Modularity
-JAR: grouping classes
-Public gone wild
-No explicit dependencies, you learn you made a mistake at runtime
-Classpath
-Destroys the grouping of JARs, all classes in the same flat list
-No explicit version control, first loaded is the winner
-
-
-
-Modular JRE/JDK
-Time for an upgrade
-Twenty year old, gigantic, monolithic runtime
-Everything is present regardless of need. (When was the last time you used AWT, or CORBA?)
-Unencapsulated internal APIs (sun.* package, Unsafe())
-Java 8: introduced compact profiles. A start, but ….
-Java 9: Project Jigsaw
-Runtime source reorganized to support modularization
-90+ modules with clearly defined interfaces and dependencies beginning with java.base
-Encapsulated internal APIs
-Custom runtime images (Think small, and IoT.)
-Java 8 compact  profiles
-. You have to move up to the next level, even if you only need one of its classes
-. compact1 Smallest profile with Java core classes and logging and scripting APIs.
-. compact2 Extends compact1 with XML, JDBC and RMI APIs.
-. compact3 Extends compact2 with security and management APIs.
-
-
-
-Modularity building block
-module-folder/
-module classes and resources
-module-info.java
-			module module.name {
-				exports  package [to target-package];
-				requires [transitive] module.name;
-			}
-Strong encapsulation: All packages in a module are private to the module
-Exported interface: Packages must be explicitly exported to be public
-Declared dependencies: Specifies required modules
-It's all about readability
-
-
-
-So, how is the wonderful trick performed?
-	The module-folder and the module-info.java file
-	The module path
-
-Readability
-.In order to access exported packages from another module, you must require it. In other words, you must be able to "read" the other module.  
-
-.Transitive requires allows you to make something you require in your module, transitively available to another module that is "reading" (i.e. requires) your module.  For instance, perhaps you require java.logging in your module so you can do some logging. If you want to make the instance of the logger through a method that you export, you potential put a burden on the other module to require java.logging itself.  However, you declare a transitive requires in your module descriptor, and the other modules implicitly requires it.
-
-Qualified Exports
-.You may want to export a package to a specific module only.  Use the to clause.
-
-Goodbye! classpath. Hello! module path.
-The classpath has been replaced with the module path. 
-Compiler and runtime use the module path to resolve exports and requires
-"Computing the transitive closure of the dependency graph"* (a.k.a. module resolution)
-Start with a single root module, add to the dependency graph
-Add each new, non-duplicating requires module to the dependency graph
-Repeat Step 2 for each module added in Step 2 
-Old code in the land of modules: a pre-migration story
-The classpath hasn't totally disappeared, just ignored unless needed
-Any classes on the classpath are loaded into the unnamed module
-The unnamed module automatically reads all other modules
-
-
-
-
-* Java 9 Modularity, Bakker and Mak
-
-Demo
-Explain Java 8 Elevator code
-. Add instance of Car to Building for demo purposes to show you can access any public class.
-Car car = new Car(new Shaft(1, 20));
-
-Translating to modules.
-. We want to prevent Building from accessing anything by elevator.
-. In for a penny, in for a pound. Once you enter the world of modules, everything becomes a module.
-. Each module needs its own module folder, so class files get moved around and re-packaged
-
-….Building becomes one module
-src/
-   building/
-      com/techelevator/building/   <<== Create new package
-         Building.java
-   Module-info.java
-      Requires elevator
-
-...and Elevator becomes another module
-   elevator/
-      com/techelevator/elevator/             << == Create new package 
-         Elevator.java
-      com/techelevator/elevator/drive/    <<== Create new package
-         Direction.java
-         Idler.java
-         Motor.java
-      com/techelevator/elevator/shaft/     <<== Create new package
-         Car.java
-         Shaft.java
-   Module-info.java
-      Exports com.techelevator.elevator
-
-To compile
-javac -d bin --module-source-path  src  $(find . -name '*.java')
-
-To run
-java --module-path bin --module building/com.techelevator.building.Building
-
-
-
-References
-Official feature list from Oracle
-https://docs.oracle.com/javase/9/migrate/toc.htm#JSMIG-GUID-7744EF96-5899-4FB2-B34E-86D49B2E89B6
-Java 9 Modularity, 1st ed.
-Sander Mak, Paul Bakker, O'Reilly Media, Inc., 2017.
-Java 9 for Programmers, 4th ed.
-Paul Deitel, Harvey Deitel, Prentice Hall, 2017.
-Modular Programming in Java 9
-Koushik Kothagal, Packt Publishing, 2017.
-Java 9 with JShell
-Gastón C. Hillar, Packt Publishing, 2017.
 
